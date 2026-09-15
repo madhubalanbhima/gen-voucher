@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gen-Vocher — Scheme Voucher Registration</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="page">
+
+    <header class="masthead">
+      <div class="masthead__mark">
+        <img src="assets/logo.svg" alt="Gen-Vocher emblem" width="44" height="44">
+      </div>
+      <div class="masthead__text">
+        <p class="masthead__eyebrow">Scheme Participation Voucher</p>
+        <h1 class="masthead__title">Gen-Vocher</h1>
+      </div>
+    </header>
+
+    <main class="sheet" id="registerView">
+      <div class="sheet__intro">
+        <h2>Register for your voucher</h2>
+        <p>Enter your details exactly as they appear on your scheme order. We'll check them against scheme records and issue your voucher on this page.</p>
+      </div>
+
+      <form id="voucherForm" novalidate>
+
+        <div class="field">
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" maxlength="35" placeholder="As printed on your passbook" autocomplete="name">
+          <p class="field__hint">Letters only, single spaces between words, up to 35 characters.</p>
+          <p class="field__error" id="err-name" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="mobile">Mobile number</label>
+          <input type="tel" id="mobile" name="mobile" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+          <p class="field__hint">10 digits, numbers only.</p>
+          <p class="field__error" id="err-mobile" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="passbookNo">Passbook number</label>
+          <input type="text" id="passbookNo" name="passbookNo" maxlength="30" placeholder="e.g. BMDMGTW-11333" autocomplete="off">
+          <p class="field__hint">This is also your voucher number. Each passbook can be used only once.</p>
+          <p class="field__error" id="err-passbookNo" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="orderDate">Scheme order date</label>
+          <input type="date" id="orderDate" name="orderDate">
+          <p class="field__hint">Must match the date in your scheme order.</p>
+          <p class="field__error" id="err-orderDate" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" maxlength="200" rows="3" placeholder="Your current residential address" autocomplete="street-address"></textarea>
+          <p class="field__hint">Required.</p>
+          <p class="field__error" id="err-address" role="alert"></p>
+        </div>
+
+        <div class="field field--submit">
+          <button type="submit" class="btn-generate" id="generateBtn">
+            <span class="btn-generate__label">Generate voucher</span>
+          </button>
+          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
+        </div>
+
+      </form>
+
+      <section class="result" id="resultArea" hidden></section>
+
+    </main>
+
+    <main class="voucher-screen" id="voucherView" hidden>
+      <div class="voucher-screen__intro">
+        <p class="masthead__eyebrow">Your verified voucher</p>
+        <h2>Voucher ready</h2>
+      </div>
+      <section class="result" id="voucherResult"></section>
+    </main>
+
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
