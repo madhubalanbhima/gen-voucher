@@ -3,9 +3,6 @@
   "functions": {
     "api/index.js": {
       "includeFiles": "client/**"
-    },
-    "api/[...path].js": {
-      "includeFiles": "client/**"
     }
   },
   "rewrites": [
