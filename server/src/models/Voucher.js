@@ -20,7 +20,7 @@ const voucherSchema = new mongoose.Schema({
   schemeOwnCode: { type: Number },
   branch: { type: String },
   issuedAt: { type: Date, default: Date.now },
-});
+}, { bufferCommands: false });
 
 // Speeds up "did this mobile/voucherNo already get a voucher" checks.
 voucherSchema.index({ mobile: 1, voucherNo: 1 });
