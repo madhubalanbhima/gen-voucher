@@ -323,7 +323,7 @@ async function voucherImage(req, res) {
       antique: "Antique.jpeg",
     }[String(voucher.category || "").toLowerCase()];
     if (!imageName) return res.status(404).send("Voucher image not found");
-    const imagePath = path.join(__dirname, "..", "..", "client", "assets", imageName);
+    const imagePath = path.join(__dirname, "..", "..", "..", "client", "assets", imageName);
     const image = fs.readFileSync(imagePath);
     res.setHeader("Content-Type", "image/jpeg");
     res.send(image);
