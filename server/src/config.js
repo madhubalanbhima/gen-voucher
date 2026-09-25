@@ -13,4 +13,5 @@ module.exports = {
   veupCampaignName: process.env.VEUP_CAMPAIGN_NAME,
   veupWabaTemplateName: process.env.VEUP_WABA_TEMPLATE_NAME,
   veupWabaServiceName: process.env.VEUP_WABA_SERVICE_NAME,
+  publicAppUrl: process.env.PUBLIC_APP_URL,
 };
