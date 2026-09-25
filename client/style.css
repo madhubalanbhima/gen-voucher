@@ -99,6 +99,31 @@ body{
   max-width: 52ch;
 }
 
+.voucher-modes{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.voucher-mode{
+  font: 600 14px var(--font-body);
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 12px 10px;
+  cursor: pointer;
+}
+
+.voucher-mode--active{
+  color: var(--paper-raised);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
 /* Fields */
 .field{
   margin-bottom: 20px;
@@ -112,7 +137,8 @@ body{
 }
 
 .field input,
-.field textarea{
+.field textarea,
+.field select{
   width: 100%;
   font-family: var(--font-body);
   font-size: 15px;
@@ -127,20 +153,23 @@ body{
 .field textarea{ resize: vertical; min-height: 64px; }
 
 .field input:focus,
-.field textarea:focus{
+.field textarea:focus,
+.field select:focus{
   outline: none;
   border-color: var(--ink);
   background: var(--paper-raised);
 }
 
 .field input:focus-visible,
-.field textarea:focus-visible{
+.field textarea:focus-visible,
+.field select:focus-visible{
   outline: 2px solid var(--gold-deep);
   outline-offset: 1px;
 }
 
 .field--invalid input,
-.field--invalid textarea{
+.field--invalid textarea,
+.field--invalid select{
   border-color: var(--bad);
   background: var(--bad-bg);
 }
@@ -188,11 +217,31 @@ body{
 .btn-generate:active{ transform: translateY(1px); }
 .btn-generate:disabled{ background: var(--ink-soft); opacity: 0.6; cursor: progress; }
 
+.btn-purchase{
+  border: 1px solid var(--gold-deep);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+.btn-purchase:hover{ background: rgba(199,154,70,0.1); }
+.btn-purchase:disabled{ opacity: 0.6; cursor: progress; }
+
 .form__status{
   margin: 0;
   font-size: 13.5px;
   color: var(--ink-soft);
 }
+
+.purchase-status{
+  margin: 0;
+  color: var(--good);
+  font-size: 13.5px;
+}
+
+.purchase-status--error{ color: var(--warn); }
 
 /* Result area */
 .result{
@@ -212,6 +261,27 @@ body{
     repeating-linear-gradient(135deg, rgba(199,154,70,0.05) 0 10px, transparent 10px 20px),
     var(--paper-raised);
   position: relative;
+}
+
+.voucher-list{
+  display: grid;
+  gap: 18px;
+}
+
+.voucher-total{
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.voucher-total strong{
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.voucher-total sup{
+  font-size: 11px;
 }
 
 .voucher__seal{
@@ -276,6 +346,25 @@ body{
   margin: 0;
   font-size: 14px;
   font-weight: 500;
+}
+
+.voucher__note{
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.voucher__delivery{
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.voucher__delivery strong{
+  color: var(--good);
 }
 
 /* Pending message (no match) */

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gen-Vocher — Scheme Voucher Registration</title>
+<title>Gen-Vocher — Voucher Registration</title>
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -16,18 +16,66 @@
         <img src="assets/logo.svg" alt="Gen-Vocher emblem" width="44" height="44">
       </div>
       <div class="masthead__text">
-        <p class="masthead__eyebrow">Scheme Participation Voucher</p>
+        <!-- <p class="masthead__eyebrow"></p> -->
         <h1 class="masthead__title">Gen-Vocher</h1>
       </div>
     </header>
 
     <main class="sheet" id="registerView">
       <div class="sheet__intro">
-        <h2>Register for your voucher</h2>
-        <p>Enter your details exactly as they appear on your scheme order. We'll check them against scheme records and issue your voucher on this page.</p>
+        <h2>Generate a voucher</h2>
+        <p>Choose a voucher type to begin. Purchase vouchers use the purchase details you submit, while scheme vouchers are checked against your passbook record.</p>
+      </div>
+
+      <div class="voucher-modes" role="group" aria-label="Voucher type">
+        <button type="button" class="voucher-mode voucher-mode--active" id="schemeModeBtn">Scheme voucher</button>
+        <button type="button" class="voucher-mode" id="purchaseModeBtn">Purchase voucher</button>
       </div>
 
       <form id="voucherForm" novalidate>
+
+        <div id="purchaseFields" hidden>
+          <div class="field">
+            <label for="branchName">Branch</label>
+            <input type="text" id="branchName" name="branchName" value="Thanjavur" maxlength="50">
+            <p class="field__error" id="err-branchName" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="customerName">Customer name</label>
+            <input type="text" id="customerName" name="customerName" maxlength="35" placeholder="Customer name">
+            <p class="field__error" id="err-customerName" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="purchaseMobile">Mobile number</label>
+            <input type="tel" id="purchaseMobile" name="purchaseMobile" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number">
+            <p class="field__error" id="err-purchaseMobile" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="invoiceNumber">Invoice number</label>
+            <input type="text" id="invoiceNumber" name="invoiceNumber" maxlength="40" placeholder="Purchase invoice number">
+            <p class="field__error" id="err-invoiceNumber" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="purchaseDate">Purchase date</label>
+            <input type="date" id="purchaseDate" name="purchaseDate">
+            <p class="field__error" id="err-purchaseDate" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" name="category">
+              <option value="">Select category</option>
+              <option value="Antique">Antique</option>
+              <option value="Regular">Regular</option>
+            </select>
+            <p class="field__error" id="err-category" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="vaAmount">VA amount</label>
+            <input type="number" id="vaAmount" name="vaAmount" min="0" step="0.01" placeholder="Amount used to calculate voucher">
+            <p class="field__hint">Antique vouchers are 20% and Regular vouchers are 25% of this amount.</p>
+            <p class="field__error" id="err-vaAmount" role="alert"></p>
+          </div>
+        </div>
 
         <div class="field">
           <label for="name">Full name</label>

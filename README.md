@@ -62,6 +62,15 @@ and `X-key` you gave me, plus a default local `MONGODB_URI`. Update
 
 ## How a request flows
 
+The landing screen offers two voucher types:
+
+1. **Purchase voucher** submits branch, customer, invoice, purchase date, category (`Antique` or `Regular`), and VA amount to `POST /api/vouchers/purchase`. Antique uses 20% of the VA amount; Regular uses 25%.
+2. **Scheme voucher** keeps the passbook lookup flow at `POST /api/vouchers/generate`.
+
+Both flows save an issued record in MongoDB with `voucherType` set to `purchase` or `scheme`.
+
+For scheme requests:
+
 1. Browser submits the form to `POST /api/vouchers/generate` with
   `{ name, mobile, passbookNo, orderDate, address }`.
 2. The server re-validates everything (name: letters/single spaces,
@@ -74,9 +83,11 @@ and `X-key` you gave me, plus a default local `MONGODB_URI`. Update
 4. It searches the response's `data` array for an entry where
    `customerDetailsViewModel.mobileNo` equals the entered mobile
    **and** `voucherNo` equals the entered voucher number.
-   - **Match** → amount = `schemeDataViewModel.totalAdvance / 2`. A
-     voucher ID is generated, the record is saved to MongoDB, and the
-     voucher card renders on the page.
+  - **Match** → the Purchase voucher button checks purchase details. Only the
+    `Thanjavur` branch is eligible. Gold or Diamond jewellery uses 25% of
+    `metalDetails.vaAmount`; Antique jewellery uses 20%. That amount is split
+    equally between Voucher 1 and Voucher 2. The invoice number is saved and
+    displayed on both voucher cards.
    - **No match** → the form shows "wait 24 hours for receiving
      voucher" and nothing is saved.
 5. The "View voucher records" panel at the bottom of the page loads

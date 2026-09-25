@@ -24,6 +24,16 @@
     passbookNo: document.getElementById("passbookNo"),
     orderDate: document.getElementById("orderDate"),
     address: document.getElementById("address"),
+    branchName: document.getElementById("branchName"),
+    customerName: document.getElementById("customerName"),
+    purchaseMobile: document.getElementById("purchaseMobile"),
+    invoiceNumber: document.getElementById("invoiceNumber"),
+    purchaseDate: document.getElementById("purchaseDate"),
+    category: document.getElementById("category"),
+    vaAmount: document.getElementById("vaAmount"),
+    purchaseFields: document.getElementById("purchaseFields"),
+    schemeModeBtn: document.getElementById("schemeModeBtn"),
+    purchaseModeBtn: document.getElementById("purchaseModeBtn"),
     generateBtn: document.getElementById("generateBtn"),
     formStatus: document.getElementById("formStatus"),
     resultArea: document.getElementById("resultArea"),
@@ -32,10 +42,32 @@
     voucherResult: document.getElementById("voucherResult"),
   };
 
+  let voucherType = "scheme";
+  const schemeFieldIds = ["name", "mobile", "passbookNo", "orderDate", "address"];
+
+  function setMode(nextType) {
+    voucherType = nextType;
+    const isPurchase = voucherType === "purchase";
+    els.purchaseFields.hidden = !isPurchase;
+    schemeFieldIds.forEach((id) => { els[id].closest(".field").hidden = isPurchase; });
+    els.schemeModeBtn.classList.toggle("voucher-mode--active", !isPurchase);
+    els.purchaseModeBtn.classList.toggle("voucher-mode--active", isPurchase);
+    els.generateBtn.querySelector(".btn-generate__label").textContent = isPurchase ? "Generate purchase voucher" : "Generate scheme voucher";
+    els.formStatus.textContent = "";
+    els.resultArea.hidden = true;
+  }
+
+  els.schemeModeBtn.addEventListener("click", () => setMode("scheme"));
+  els.purchaseModeBtn.addEventListener("click", () => setMode("purchase"));
+
   // ---- Live input shaping ------------------------------------------
 
   els.mobile.addEventListener("input", () => {
     els.mobile.value = els.mobile.value.replace(/[^0-9]/g, "").slice(0, 10);
+  });
+
+  els.purchaseMobile.addEventListener("input", () => {
+    els.purchaseMobile.value = els.purchaseMobile.value.replace(/[^0-9]/g, "").slice(0, 10);
   });
 
   els.passbookNo.addEventListener("input", () => {
@@ -100,6 +132,27 @@
     return !msg;
   }
 
+  function validatePurchase() {
+    const fields = [
+      [els.branchName, "err-branchName", "Branch is required."],
+      [els.customerName, "err-customerName", "Customer name is required."],
+      [els.invoiceNumber, "err-invoiceNumber", "Invoice number is required."],
+      [els.purchaseDate, "err-purchaseDate", "Purchase date is required."],
+      [els.category, "err-category", "Choose Antique or Regular."],
+      [els.vaAmount, "err-vaAmount", "Enter a valid VA amount."],
+    ];
+    let valid = true;
+    fields.forEach(([field, errorId, message]) => {
+      const value = field.value.trim();
+      const validValue = field === els.vaAmount ? value !== "" && Number(value) >= 0 : Boolean(value);
+      setFieldError(field, document.getElementById(errorId), validValue ? "" : message);
+      valid = validValue && valid;
+    });
+    const mobileValid = MOBILE_RE.test(els.purchaseMobile.value);
+    setFieldError(els.purchaseMobile, document.getElementById("err-purchaseMobile"), mobileValid ? "" : "Enter exactly 10 digits.");
+    return mobileValid && valid;
+  }
+
   [
     [els.name, validateName],
     [els.mobile, validateMobile],
@@ -109,6 +162,7 @@
   ].forEach(([el, fn]) => el.addEventListener("blur", fn));
 
   function validateAll() {
+    if (voucherType === "purchase") return validatePurchase();
     const results = [validateName(), validateMobile(), validatePassbookNo(), validateOrderDate(), validateAddress()];
     return results.every(Boolean);
   }
@@ -120,7 +174,16 @@
       passbookNo: [els.passbookNo, document.getElementById("err-passbookNo")],
       orderDate: [els.orderDate, document.getElementById("err-orderDate")],
       address: [els.address, document.getElementById("err-address")],
+      branchName: [els.branchName, document.getElementById("err-branchName")],
+      customerName: [els.customerName, document.getElementById("err-customerName")],
+      invoiceNumber: [els.invoiceNumber, document.getElementById("err-invoiceNumber")],
+      purchaseDate: [els.purchaseDate, document.getElementById("err-purchaseDate")],
+      category: [els.category, document.getElementById("err-category")],
+      vaAmount: [els.vaAmount, document.getElementById("err-vaAmount")],
     };
+    map.mobile = voucherType === "purchase"
+      ? [els.purchaseMobile, document.getElementById("err-purchaseMobile")]
+      : [els.mobile, document.getElementById("err-mobile")];
     Object.entries(errors || {}).forEach(([key, msg]) => {
       const pair = map[key];
       if (pair) setFieldError(pair[0], pair[1], msg);
@@ -130,27 +193,40 @@
   // ---- Formatting helpers -----------------------------------------
 
   function formatRupees(amount) {
-    return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(amount);
   }
 
   // ---- Result rendering ---------------------------------------------
 
-  function renderVoucher({ voucherId, name, mobile, voucherNo, amount, issuedAt }) {
-    els.registerView.hidden = true;
-    els.voucherView.hidden = false;
-    els.voucherResult.innerHTML = `
+  function renderVoucher({ voucherId, name, mobile, voucherNo, amount, voucherAmount, invoiceNumber, issuedAt, voucherType, whatsappStatus }) {
+    const amountPerVoucher = voucherAmount ?? amount / 2;
+    const deliveryLabel = whatsappStatus === "sent" ? "Sent" : whatsappStatus === "failed" ? "Failed" : "Pending";
+    const voucherDetails = (heading) => `
       <div class="voucher">
         <span class="voucher__seal">Verified</span>
-        <p class="voucher__eyebrow">Voucher issued</p>
+        <p class="voucher__eyebrow">${heading}</p>
         <p class="voucher__id">${voucherId}</p>
-        <p class="voucher__amount"><sup>&#8377;</sup>${formatRupees(amount)}</p>
+        <p class="voucher__amount"><sup>&#8377;</sup>${formatRupees(amountPerVoucher)}</p>
         <dl class="voucher__grid">
           <div><dt>Name</dt><dd>${name}</dd></div>
           <div><dt>Mobile</dt><dd>${mobile}</dd></div>
           <div><dt>Voucher no.</dt><dd>${voucherNo}</dd></div>
+          <div><dt>Invoice no.</dt><dd>${invoiceNumber}</dd></div>
           <div><dt>Issued</dt><dd>${new Date(issuedAt).toLocaleString("en-IN")}</dd></div>
         </dl>
-        <p class="voucher__note">Voucher will be sent to the registered mobile number via whatsapp</p>
+        <p class="voucher__note">You only purchase the gold jewellery.</p>
+        <p class="voucher__delivery">WhatsApp delivery: <strong>${deliveryLabel}</strong></p>
+      </div>
+    `;
+
+    els.registerView.hidden = true;
+    els.voucherView.hidden = false;
+    const voucherLabel = voucherType === "purchase" ? "Purchase voucher" : "Voucher";
+    const voucherCards = `${voucherDetails(`${voucherLabel} 1`)}${voucherDetails(`${voucherLabel} 2`)}`;
+    els.voucherResult.innerHTML = `
+      <p class="voucher-total">Total voucher value: <strong><sup>&#8377;</sup>${formatRupees(amount)}</strong></p>
+      <div class="voucher-list">
+        ${voucherCards}
       </div>
     `;
     celebrateVoucher();
@@ -220,19 +296,30 @@
       return;
     }
 
-    const payload = {
-      name: els.name.value.trim(),
-      mobile: els.mobile.value.trim(),
-      passbookNo: els.passbookNo.value.trim(),
-      orderDate: els.orderDate.value,
-      address: els.address.value.trim(),
-    };
+    const payload = voucherType === "purchase"
+      ? {
+          branchName: els.branchName.value.trim(),
+          customerName: els.customerName.value.trim(),
+          mobile: els.purchaseMobile.value.trim(),
+          invoiceNumber: els.invoiceNumber.value.trim(),
+          purchaseDate: els.purchaseDate.value,
+          category: els.category.value,
+          vaAmount: els.vaAmount.value.trim(),
+        }
+      : {
+          name: els.name.value.trim(),
+          mobile: els.mobile.value.trim(),
+          passbookNo: els.passbookNo.value.trim(),
+          orderDate: els.orderDate.value,
+          address: els.address.value.trim(),
+        };
 
     els.generateBtn.disabled = true;
-    els.formStatus.textContent = "Checking scheme records…";
+    els.formStatus.textContent = voucherType === "purchase" ? "Generating purchase voucher..." : "Checking scheme records…";
 
     try {
-      const res = await fetch(`${API_BASE}/generate`, {
+      const endpoint = voucherType === "purchase" ? "purchase" : "generate";
+      const res = await fetch(`${API_BASE}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
