@@ -9,6 +9,7 @@ const { whatsappApiKey,
 
 async function sendVoucherMessage({ mobile, amount, imageUrl }) {
   const mediaUrl = imageUrl || whatsappVoucherImageUrl;
+  const recipientNumber = formatRecipientNumber(mobile);
   if (!whatsappApiKey || !mediaUrl) {
     throw new Error("WhatsApp API credentials or voucher image URL is not configured.");
   }
@@ -37,7 +38,7 @@ async function sendVoucherMessage({ mobile, amount, imageUrl }) {
       {
         api_key: whatsappApiKey,
         campaign_name: veupCampaignName,
-        to: { number: mobile },
+        to: { number: recipientNumber },
         delivery: { type: "single", channels: ["waba"] },
         campaign_data: {
           waba: {
@@ -61,6 +62,13 @@ async function sendVoucherMessage({ mobile, amount, imageUrl }) {
   }
 
   return response;
+}
+
+function formatRecipientNumber(mobile) {
+  const digits = String(mobile || "").replace(/\D/g, "");
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 12 && digits.startsWith("91")) return digits;
+  return String(mobile || "").trim();
 }
 
 function assertUrl(value, variableName) {
