@@ -289,10 +289,19 @@ async function deliverVoucherCopies(req, voucher, mobile) {
       throw new Error("PUBLIC_APP_URL must be a public URL so WhatsApp can fetch the voucher image.");
     }
     const imageBaseUrl = `${appUrl.replace(/\/$/, "")}/api/vouchers/${encodeURIComponent(voucher.voucherId)}/image`;
+    const purchaseTemplateNames = {
+      diamond: "thanjavur_diamond_voucher",
+      antique: "thanjavur_antique_voucher",
+      gold: "thanjavur_gold_voucher",
+    };
+    const templateName = voucher.voucherType === "purchase"
+      ? purchaseTemplateNames[String(voucher.category || "").toLowerCase()]
+      : undefined;
     const responses = await Promise.all([1, 2].map((copy) => sendVoucherMessage({
       mobile,
       amount: voucher.voucherAmount,
       imageUrl: `${imageBaseUrl}?copy=${copy}`,
+      templateName,
     })));
     const messageIds = responses.map((response) => getWhatsappMessageId(response?.data)).filter(Boolean);
     await Voucher.updateOne(

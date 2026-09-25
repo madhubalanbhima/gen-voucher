@@ -7,7 +7,7 @@ const { whatsappApiKey,
     veupWabaServiceName, 
     veupWabaTemplateName } = require("../config");
 
-async function sendVoucherMessage({ mobile, amount, imageUrl }) {
+async function sendVoucherMessage({ mobile, amount, imageUrl, templateName }) {
   const mediaUrl = imageUrl || whatsappVoucherImageUrl;
   const recipientNumber = formatRecipientNumber(mobile);
   if (!whatsappApiKey || !mediaUrl) {
@@ -42,7 +42,7 @@ async function sendVoucherMessage({ mobile, amount, imageUrl }) {
         delivery: { type: "single", channels: ["waba"] },
         campaign_data: {
           waba: {
-            template_name: veupWabaTemplateName,
+            template_name: templateName || veupWabaTemplateName,
             service_name: veupWabaServiceName,
             media_url: mediaUrl,
             params: [String(amount)],
