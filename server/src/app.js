@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const connectDB = require("./db");
 const voucherRoutes = require("./routes/voucherRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api", async (req, res, next) => {
   }
 });
 app.use("/api/vouchers", voucherRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(clientDir, "index.html"));

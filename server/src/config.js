@@ -20,4 +20,6 @@ module.exports = {
   veupWabaTemplateName: process.env.VEUP_WABA_TEMPLATE_NAME,
   veupWabaServiceName: process.env.VEUP_WABA_SERVICE_NAME,
   publicAppUrl: process.env.PUBLIC_APP_URL,
+  adminPassword: process.env.ADMIN_PASSWORD,
+  adminSessionSecret: process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD,
 };

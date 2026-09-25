@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gen-Vocher Admin</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-page">
+    <header class="admin-header">
+      <img src="assets/BhimaLogo.png" alt="Bhima Jewellery logo" width="92" height="64">
+      <div>
+        <p class="admin-kicker">Bhima Jewellery</p>
+        <h1>Voucher administration</h1>
+      </div>
+    </header>
+
+    <section class="admin-panel" id="loginPanel">
+      <h2>Admin login</h2>
+      <form id="loginForm">
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" type="password" autocomplete="current-password" required>
+        <button type="submit">Sign in</button>
+      </form>
+      <p class="admin-status" id="loginStatus" role="alert"></p>
+    </section>
+
+    <section class="admin-panel" id="exportPanel" hidden>
+      <div class="panel-heading">
+        <div>
+          <p class="admin-kicker">Authenticated</p>
+          <h2>Export voucher data</h2>
+        </div>
+        <button class="button-secondary" id="signOutButton" type="button">Sign out</button>
+      </div>
+      <p>Download all stored voucher records from MongoDB.</p>
+      <div class="export-actions">
+        <a class="button" href="/api/admin/export?format=csv">Export CSV</a>
+        <a class="button" href="/api/admin/export?format=json">Export JSON</a>
+      </div>
+      <p class="admin-status" id="exportStatus" role="status"></p>
+    </section>
+  </main>
+<script src="admin.js"></script>
+</body>
+</html>
