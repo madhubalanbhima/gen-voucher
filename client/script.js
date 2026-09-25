@@ -138,7 +138,7 @@
       [els.customerName, "err-customerName", "Customer name is required."],
       [els.invoiceNumber, "err-invoiceNumber", "Invoice number is required."],
       [els.purchaseDate, "err-purchaseDate", "Purchase date is required."],
-      [els.category, "err-category", "Choose Antique or Regular."],
+      [els.category, "err-category", "Choose Gold, Diamond or Antique."],
       [els.vaAmount, "err-vaAmount", "Enter a valid VA amount."],
     ];
     let valid = true;

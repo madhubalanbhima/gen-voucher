@@ -3,6 +3,9 @@
   "functions": {
     "api/index.js": {
       "includeFiles": "client/**"
+    },
+    "api/vouchers/[voucherId]/image.js": {
+      "includeFiles": "client/assets/**"
     }
   },
   "rewrites": [

@@ -1,5 +1,6 @@
 const crypto = require("crypto");
-const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
 const Voucher = require("../models/Voucher");
 const { fetchSchemeRecordsByMobile, findMatchingRecord } = require("../services/schemeApi");
 const { fetchPurchaseDetails } = require("../services/purchaseApi");
@@ -9,7 +10,7 @@ const { publicAppUrl } = require("../config");
 const NAME_RE = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 const MOBILE_RE = /^[0-9]{10}$/;
 const PASSBOOK_RE = /^[A-Za-z0-9-]+$/;
-const CATEGORY_RE = /^(antique|regular)$/i;
+const CATEGORY_RE = /^(antique|gold|diamond)$/i;
 const NUMBER_RE = /^\d+(?:\.\d{1,2})?$/;
 const VOUCHER_CUTOFF = Date.UTC(2026, 8, 14);
 const PURCHASE_BRANCH = "Thanjavur";
@@ -57,7 +58,7 @@ function getPurchaseVoucherAmount(purchase) {
   const vaAmount = Number(purchase?.metalDetails?.vaAmount);
   if (!Number.isFinite(vaAmount) || vaAmount < 0) return null;
   if (category === "antique") return vaAmount * 0.2;
-  if (category === "regular") return vaAmount * 0.25;
+  if (category === "gold" || category === "diamond") return vaAmount * 0.25;
   return null;
 }
 
@@ -87,7 +88,7 @@ async function purchaseVoucher(req, res) {
     if (!MOBILE_RE.test(String(payload.mobile || "").trim())) errors.mobile = "Enter exactly 10 digits.";
     if (!String(payload.invoiceNumber || "").trim()) errors.invoiceNumber = "Invoice number is required.";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.purchaseDate || ""))) errors.purchaseDate = "Enter a valid purchase date.";
-    if (!CATEGORY_RE.test(category)) errors.category = "Choose Antique or Regular.";
+    if (!CATEGORY_RE.test(category)) errors.category = "Choose Gold, Diamond or Antique.";
     if (!NUMBER_RE.test(vaAmount) || Number(vaAmount) < 0) errors.vaAmount = "Enter a valid VA amount.";
     if (Object.keys(errors).length > 0) {
       return res.status(422).json({ status: "invalid", errors });
@@ -316,47 +317,20 @@ async function voucherImage(req, res) {
   try {
     const voucher = await Voucher.findOne({ voucherId: req.params.voucherId }).lean();
     if (!voucher) return res.status(404).send("Voucher not found");
-    const copy = req.query.copy === "2" ? "2" : "1";
-    const svg = makeVoucherSvg(voucher, copy);
-    const image = await sharp(Buffer.from(svg)).png().toBuffer();
-    res.setHeader("Content-Type", "image/png");
+    const imageName = {
+      gold: "Gold.jpeg",
+      diamond: "Diamond.jpeg",
+      antique: "Antique.jpeg",
+    }[String(voucher.category || "").toLowerCase()];
+    if (!imageName) return res.status(404).send("Voucher image not found");
+    const imagePath = path.join(__dirname, "..", "..", "client", "assets", imageName);
+    const image = fs.readFileSync(imagePath);
+    res.setHeader("Content-Type", "image/jpeg");
     res.send(image);
   } catch (err) {
     console.error("Voucher image generation failed:", err.message);
     res.status(500).send("Could not generate voucher image");
   }
-}
-
-function makeVoucherSvg(voucher, copy) {
-  const text = (value) => escapeXml(value);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
-    <rect width="1200" height="700" fill="#fffdf9"/>
-    <rect x="18" y="18" width="1164" height="664" rx="8" fill="none" stroke="#9c7530" stroke-width="3"/>
-    <text x="70" y="82" fill="#33486b" font-family="Georgia, serif" font-size="24">${text(voucher.voucherType === "purchase" ? `Purchase voucher ${copy}` : `Scheme voucher ${copy}`)}</text>
-    <text x="70" y="140" fill="#12294d" font-family="Georgia, serif" font-size="34" font-weight="bold">${text(voucher.voucherId)}</text>
-    <text x="70" y="245" fill="#12294d" font-family="Georgia, serif" font-size="72" font-weight="bold">&#8377;${text(voucher.voucherAmount)}</text>
-    <line x1="70" y1="285" x2="1130" y2="285" stroke="#d8cfb8" stroke-dasharray="8 8"/>
-    <text x="70" y="350" fill="#33486b" font-family="Arial, sans-serif" font-size="18">Name</text>
-    <text x="70" y="382" fill="#12294d" font-family="Arial, sans-serif" font-size="22">${text(voucher.name)}</text>
-    <text x="620" y="350" fill="#33486b" font-family="Arial, sans-serif" font-size="18">Mobile</text>
-    <text x="620" y="382" fill="#12294d" font-family="Arial, sans-serif" font-size="22">${text(voucher.mobile)}</text>
-    <text x="70" y="440" fill="#33486b" font-family="Arial, sans-serif" font-size="18">Voucher no.</text>
-    <text x="70" y="472" fill="#12294d" font-family="Arial, sans-serif" font-size="22">${text(voucher.voucherNo)}</text>
-    <text x="620" y="440" fill="#33486b" font-family="Arial, sans-serif" font-size="18">Invoice no.</text>
-    <text x="620" y="472" fill="#12294d" font-family="Arial, sans-serif" font-size="22">${text(voucher.invoiceNumber)}</text>
-    <line x1="70" y1="525" x2="1130" y2="525" stroke="#d8cfb8" stroke-dasharray="8 8"/>
-    <text x="70" y="585" fill="#33486b" font-family="Georgia, serif" font-size="18" font-style="italic">You only purchase the gold jewellery.</text>
-    <text x="70" y="630" fill="#2f6b4f" font-family="Arial, sans-serif" font-size="18">Verified voucher</text>
-  </svg>`;
-}
-
-function escapeXml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 function getWhatsappMessageId(responseData) {
