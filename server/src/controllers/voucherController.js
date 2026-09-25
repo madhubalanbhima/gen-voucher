@@ -296,7 +296,11 @@ async function deliverVoucherCopies(req, voucher, mobile) {
     if (messageIds[0]) voucher.whatsappMessageId = messageIds[0];
   } catch (err) {
     console.error("WhatsApp voucher delivery failed:", err.message);
-    await Voucher.updateOne({ _id: voucher._id }, { $set: { whatsappStatus: "failed" } });
+    try {
+      await Voucher.updateOne({ _id: voucher._id }, { $set: { whatsappStatus: "failed" } });
+    } catch (updateError) {
+      console.error("Could not record WhatsApp delivery failure:", updateError.message);
+    }
     voucher.whatsappStatus = "failed";
   }
 }
