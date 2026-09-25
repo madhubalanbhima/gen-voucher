@@ -319,7 +319,8 @@ async function voucherImage(req, res) {
     const copy = req.query.copy === "2" ? "2" : "1";
     const svg = makeVoucherSvg(voucher, copy);
     const image = await sharp(Buffer.from(svg)).png().toBuffer();
-    res.type("png").send(image);
+    res.setHeader("Content-Type", "image/png");
+    res.send(image);
   } catch (err) {
     console.error("Voucher image generation failed:", err.message);
     res.status(500).send("Could not generate voucher image");
