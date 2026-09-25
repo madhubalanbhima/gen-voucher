@@ -9,12 +9,18 @@ app.use(express.json());
 
 const clientDir = path.join(__dirname, "..", "..", "client");
 app.use(express.static(clientDir));
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(503).json({ status: "error", message: "Database is unavailable." });
+  }
+});
 app.use("/api/vouchers", voucherRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(clientDir, "index.html"));
 });
-
-connectDB();
 
 module.exports = app;
