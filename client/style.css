@@ -54,13 +54,28 @@ body{
 .masthead{
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding-bottom: 22px;
   border-bottom: 2px solid var(--ink);
   margin-bottom: 28px;
 }
 
 .masthead__mark img{ display: block; }
+
+.masthead__mark{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.masthead__bhima{
+  display: block;
+  width: 92px;
+  height: 64px;
+  object-fit: contain;
+  object-position: left center;
+  flex: 0 0 auto;
+}
 
 .masthead__eyebrow{
   margin: 0 0 2px;
