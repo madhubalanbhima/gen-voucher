@@ -76,6 +76,7 @@ async function getEligiblePurchase() {
 }
 
 async function purchaseVoucher(req, res) {
+  let step = "validation";
   try {
     const payload = req.body || {};
     const category = String(payload.category || "").trim().toLowerCase();
@@ -92,6 +93,7 @@ async function purchaseVoucher(req, res) {
       return res.status(422).json({ status: "invalid", errors });
     }
 
+    step = "purchase lookup";
     const purchase = await fetchPurchaseDetails({
       branchName: String(payload.branchName).trim(),
       metalDetails: { Category: category, vaAmount: Number(vaAmount) },
@@ -119,11 +121,13 @@ async function purchaseVoucher(req, res) {
     }
 
     const voucherAmount = amount / 2;
+    step = "checking duplicate invoice";
     const existingVoucher = await Voucher.exists({ invoiceNumber });
     if (existingVoucher) {
       return res.status(409).json({ status: "duplicate", message: "This invoice already has a voucher." });
     }
 
+    step = "saving voucher";
     const voucher = await Voucher.create({
       voucherId: makeVoucherId(),
       name: customer.customerName || "Customer",
@@ -148,7 +152,10 @@ async function purchaseVoucher(req, res) {
     if (err.code === 11000) {
       return res.status(409).json({ status: "duplicate", message: "This invoice already has a voucher." });
     }
-    console.error("Purchase voucher generation failed:", err.message);
+    console.error(`Purchase voucher generation failed during ${step}:`, err.stack || err.message);
+    if (step === "checking duplicate invoice" || step === "saving voucher") {
+      return res.status(503).json({ status: "error", message: "Voucher storage is unavailable. Please try again shortly." });
+    }
     return res.status(500).json({ status: "error", message: "Could not generate the purchase voucher." });
   }
 }
