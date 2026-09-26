@@ -295,7 +295,7 @@ async function deliverVoucherCopies(req, voucher, mobile) {
     const imageBaseUrl = `${appUrl.replace(/\/$/, "")}/api/vouchers/${encodeURIComponent(voucher.voucherId)}/image`;
     const templateNamesByCategory = {
       diamond: ["tnj_diamond_voucher_1", "tnj_diamond_voucher_2"],
-      antique: ["tnj_gold_voucher_01", "tnj_gold_voucher_02"],
+      antique: ["tnj_gold_voucher_01", "tnj_gold_voucher_2"],
       gold: ["tnj_gold_voucher_01", "tnj_gold_voucher_2"],
     };
     const category = voucher.voucherType === "scheme"
