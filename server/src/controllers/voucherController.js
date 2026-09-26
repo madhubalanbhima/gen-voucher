@@ -234,6 +234,10 @@ async function generateVoucher(req, res) {
 
   const amount = advance * 0.5;
   const voucherAmount = amount / 2;
+  const schemeOwnCode = Number(match.ownCode);
+  const hasNumericSchemeOwnCode = match.ownCode != null
+    && String(match.ownCode).trim() !== ""
+    && Number.isFinite(schemeOwnCode);
 
   try {
     const existingPassbook = await Voucher.exists({ passbookNo: cleanPassbookNo });
@@ -258,7 +262,7 @@ async function generateVoucher(req, res) {
       status: "issued",
       category: purchase.metalDetails.Category,
       variant: purchase.metalDetails.Variant ?? purchase.metalDetails.Varient,
-      schemeOwnCode: match.ownCode,
+      ...(hasNumericSchemeOwnCode ? { schemeOwnCode } : {}),
       branch: purchase.branchName,
     });
 
@@ -326,11 +330,13 @@ async function voucherImage(req, res) {
   try {
     const voucher = await Voucher.findOne({ voucherId: req.params.voucherId }).lean();
     if (!voucher) return res.status(404).send("Voucher not found");
-    const imageName = {
-      gold: "Gold.jpeg",
-      diamond: "Diamond.jpeg",
-      antique: "Antique.jpeg",
-    }[String(voucher.category || "").toLowerCase()];
+    const imageName = voucher.voucherType === "scheme"
+      ? "passbook.jpeg"
+      : {
+          gold: "Gold.jpeg",
+          diamond: "Diamond.jpeg",
+          antique: "Antique.jpeg",
+        }[String(voucher.category || "").toLowerCase()];
     if (!imageName) return res.status(404).send("Voucher image not found");
     const imagePath = path.join(__dirname, "..", "..", "..", "client", "assets", imageName);
     const image = fs.readFileSync(imagePath);
