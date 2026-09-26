@@ -302,12 +302,15 @@ async function deliverVoucherCopies(req, voucher, mobile) {
       ? "gold"
       : String(voucher.category || "").toLowerCase();
     const templateNames = templateNamesByCategory[category];
-    const responses = await Promise.all([1, 2].map((copy) => sendVoucherMessage({
-      mobile,
-      amount: voucher.voucherAmount,
-      imageUrl: `${imageBaseUrl}?copy=${copy}`,
-      templateName: templateNames?.[copy - 1],
-    })));
+    const responses = [];
+    for (const copy of [1, 2]) {
+      responses.push(await sendVoucherMessage({
+        mobile,
+        amount: voucher.voucherAmount,
+        imageUrl: `${imageBaseUrl}?copy=${copy}`,
+        templateName: templateNames?.[copy - 1],
+      }));
+    }
     const messageIds = responses.map((response) => getWhatsappMessageId(response?.data)).filter(Boolean);
     await Voucher.updateOne(
       { _id: voucher._id },
