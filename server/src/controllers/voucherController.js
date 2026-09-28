@@ -251,7 +251,7 @@ async function generateVoucher(req, res) {
     const voucher = await Voucher.create({
       voucherId: makeVoucherId(),
       name: name.trim(),
-      mobile: String(purchase.customerDetails?.mobileNumber || cleanMobile),
+      mobile: cleanMobile,
       voucherNo: cleanPassbookNo,
       passbookNo: cleanPassbookNo,
       orderDate: new Date(requestedOrderDate),
@@ -266,7 +266,7 @@ async function generateVoucher(req, res) {
       branch: purchase.branchName,
     });
 
-    await deliverVoucherCopies(req, voucher, String(purchase.customerDetails?.mobileNumber || cleanMobile));
+    await deliverVoucherCopies(req, voucher, cleanMobile);
 
     return res.status(201).json({ status: "issued", voucher });
   } catch (err) {
