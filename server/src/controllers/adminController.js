@@ -28,10 +28,10 @@ async function adminExport(req, res) {
     const vouchers = await Voucher.find().sort({ issuedAt: -1 }).lean();
     const format = String(req.query?.format || "json").toLowerCase();
     if (format === "csv") {
-      const fields = ["voucherId", "voucherType", "name", "mobile", "voucherNo", "invoiceNumber", "category", "branch", "amount", "voucherAmount", "status", "whatsappStatus", "issuedAt"];
+      const fields = ["voucherId", "voucherType", "name", "mobile", "voucherNo", "invoiceNumber", "orderDate", "category", "branch", "amount", "voucherAmount", "status", "whatsappStatus", "issuedAt"];
       const rows = [fields.join(",")];
       vouchers.forEach((voucher) => {
-        rows.push(fields.map((field) => csvValue(voucher[field])).join(","));
+        rows.push(fields.map((field) => csvValue(field === "orderDate" ? formatDate(voucher[field]) : voucher[field])).join(","));
       });
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", 'attachment; filename="vouchers.csv"');
@@ -78,6 +78,14 @@ function parseCookies(header) {
 function csvValue(value) {
   const text = value instanceof Date ? value.toISOString() : String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function formatDate(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return [date.getUTCDate(), date.getUTCMonth() + 1, date.getUTCFullYear()]
+    .map((part) => String(part).padStart(2, "0"))
+    .join("-");
 }
 
 module.exports = { adminLogin, adminExport };
