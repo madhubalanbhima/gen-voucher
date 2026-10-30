@@ -12,7 +12,7 @@ const MOBILE_RE = /^[0-9]{10}$/;
 const PASSBOOK_RE = /^[A-Za-z0-9-]+$/;
 const CATEGORY_RE = /^(antique|gold|diamond)$/i;
 const NUMBER_RE = /^\d+(?:\.\d{1,2})?$/;
-const VOUCHER_CUTOFF = Date.UTC(2026, 8, 14);
+const VOUCHER_CUTOFF = Date.UTC(2026, 8, 12);
 const PURCHASE_BRANCH = "Thanjavur";
 
 function validatePayload({ name, mobile, passbookNo, orderDate, address }) {
@@ -204,7 +204,7 @@ async function generateVoucher(req, res) {
   if (matchingOrderDate < VOUCHER_CUTOFF) {
     return res.status(200).json({
       status: "ineligible",
-      message: "Vouchers are not generated for scheme orders dated before 20 September 2026.",
+      message: "Vouchers are not generated for scheme orders dated before 13 September 2026.",
     });
   }
 
